@@ -58,6 +58,7 @@ private fun NightStepScaffold(
 }
 
 /** Список живых игроков для выбора цели (одиночный выбор, с подтверждением). */
+/** Список живых игроков для выбора цели (одиночный выбор, с подтверждением). */
 @Composable
 private fun TargetPicker(
     label: String,
@@ -65,6 +66,50 @@ private fun TargetPicker(
     accent: androidx.compose.ui.graphics.Color,
     allowSkip: Boolean = false,
     skipLabel: String = "Пропустить",
+    onPicked: (GamePlayer?) -> Unit,
+) {
+    var selected by remember(targets) { mutableStateOf<GamePlayer?>(null) }
+    Column(modifier = Modifier.fillMaxHeight()) {
+        Text(label, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        Spacer(Modifier.height(14.dp))
+        LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            items(targets, key = { it.name }) { p ->
+                val isSelected = selected?.name == p.name
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = if (isSelected) accent.copy(alpha = 0.22f) else MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { selected = p }
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            p.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) accent else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        PrimaryActionButton(
+            text = "Подтвердить",
+            enabled = selected != null,
+            containerColor = accent,
+            onClick = { onPicked(selected) }
+        )
+        if (allowSkip) {
+            Spacer(Modifier.height(10.dp))
+            SecondaryActionButton(text = skipLabel, onClick = { onPicked(null) })
+        }
+    }
+}
+
     onPicked: (GamePlayer?) -> Unit,
 ) {
 
